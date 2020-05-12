@@ -77,14 +77,17 @@ class Variable(object):
         if self.is_binned:
             # Check that the input is well-formed
             try:
-                assert all([len(x) == 2 for x in value_list])
+                assert all([2 <= len(x) <= 3 for x in value_list])
             except (AssertionError, TypeError, ValueError):
                 raise ValueError("For binned Variables, values should be tuples of length two: \
                                  (lower bin edge, upper bin edge)."
                                 )
 
             # All good
-            self._values = [(float(x[0]), float(x[1])) for x in value_list]
+            if len(value_list[0]) == 2:
+                self._values = [(float(x[0]), float(x[1])) for x in value_list]
+            else:
+                self._values = [(float(x[0]), float(x[1]), float(x[2])) for x in value_list]
         else:
             # Check that the input is well-formed
             try:
@@ -169,6 +172,9 @@ class Variable(object):
                                                           self.digits)
                 valuedict["high"] = helpers.relative_round(self._values[i][1],
                                                            self.digits)
+                if len(self._values[i]) > 2:
+                    valuedict["value"] = helpers.relative_round(self._values[i][2],
+                                                                self.digits)
             else:
                 valuedict["value"] = helpers.relative_round(self._values[i],
                                                             self.digits)
